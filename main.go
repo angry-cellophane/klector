@@ -1,7 +1,10 @@
 package main
 
-import "os"
+import (
+	"io.klector/klector/commands"
+	"os"
+)
 
 func main() {
-	os.Exit()
+	os.Exit(commands.Execute())
 }
