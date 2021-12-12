@@ -1,5 +1,7 @@
 package storage
 
+import "log"
+
 type Event struct {
 	Id         string            `json:"id"`
 	Attributes map[string]string `json:"attributes"`
@@ -25,6 +27,7 @@ type inMemoryStorage struct {
 }
 
 func (s *inMemoryStorage) Write(event *Event) {
+	log.Printf("Received event %s", *event)
 	// noop
 }
 func (s *inMemoryStorage) Query(query *Query) *ResultSet {

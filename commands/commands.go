@@ -2,7 +2,8 @@ package commands
 
 import (
 	"github.com/spf13/cobra"
-	"log"
+	"io.klector/klector/api"
+	"io.klector/klector/storage"
 )
 
 var (
@@ -15,14 +16,19 @@ var (
 		Use:     "run",
 		Example: "klector run",
 		Short:   "Start klector",
+		RunE:    run,
 	}
 )
+
+func run(cmd *cobra.Command, args []string) error {
+	storage := storage.Create()
+	return api.Create(&storage)
+}
 
 func Execute() int {
 	rootCmd.AddCommand(runCmd)
 
 	if err := rootCmd.Execute(); err != nil {
-		log.Fatal(err)
 		return 1
 	}
 

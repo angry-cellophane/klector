@@ -1,3 +1,6 @@
 # jetbrains stuff
 .idea/
 **.iml
+
+# output
+./klector
