@@ -3,6 +3,7 @@ package storage
 import (
 	"errors"
 	"log"
+	"sync"
 )
 
 type bucketNode struct {
@@ -12,11 +13,15 @@ type bucketNode struct {
 }
 
 type timeSeries struct {
+	mu    sync.RWMutex
 	first *bucketNode
 	nodes map[uint64]*bucketNode
 }
 
 func (t *timeSeries) add(ts uint64, value uint64) {
+	t.mu.Lock()
+	defer t.mu.Unlock()
+
 	node, found := t.nodes[ts]
 	if !found {
 		node = t.findPrevBucketNode(ts)
@@ -34,6 +39,9 @@ func (t *timeSeries) add(ts uint64, value uint64) {
 }
 
 func (t *timeSeries) getCount(startTs uint64, endTs uint64) uint64 {
+	t.mu.RLock()
+	defer t.mu.RUnlock()
+
 	var sum uint64 = 0
 	node := t.findPrevBucketNode(startTs).next
 	for node != nil && node.ts <= endTs {
@@ -52,7 +60,8 @@ func (t *timeSeries) findPrevBucketNode(ts uint64) *bucketNode {
 }
 
 type inMemoryStorage struct {
-	attributes map[string]map[string]*timeSeries
+	mu         sync.RWMutex
+	attributes *sync.Map // map[string]map[string]*timeSeries
 }
 
 func (s *inMemoryStorage) Write(event *Event) error {
@@ -64,13 +73,25 @@ func (s *inMemoryStorage) Write(event *Event) error {
 	}
 
 	for name, value := range event.Attributes {
-		values, found := s.attributes[name]
+		values, found := s.attributes.Load(name)
 		if !found {
-			values = make(map[string]*timeSeries)
-			s.attributes[name] = values
+			s.mu.Lock()
+			_values := &sync.Map{} //make(map[string]*timeSeries)
+			_values.Store(value, &timeSeries{
+				first: &bucketNode{
+					ts:    0,
+					value: 0,
+					next:  nil,
+				},
+				nodes: make(map[uint64]*bucketNode),
+			})
+			values = _values
+			s.attributes.Store(name, values)
+			s.mu.Unlock()
 		}
-		series, found := values[value]
+		series, found := values.(*sync.Map).Load(value)
 		if !found {
+			s.mu.Lock()
 			series = &timeSeries{
 				first: &bucketNode{
 					ts:    0,
@@ -79,28 +100,30 @@ func (s *inMemoryStorage) Write(event *Event) error {
 				},
 				nodes: make(map[uint64]*bucketNode),
 			}
-			values[value] = series
+			values.(*sync.Map).Store(value, series)
+			s.mu.Unlock()
 		}
-		series.add(event.Timestamp, 1)
+		series.(*timeSeries).add(event.Timestamp, 1)
 	}
 	log.Printf("Received event %v", *event)
 
 	return nil
 }
+
 func (s *inMemoryStorage) Query(query *Query) *ResultSet {
 	var count uint64 = 0
 	for name, value := range query.Attributes {
-		attr, found := s.attributes[name]
+		attr, found := s.attributes.Load(name)
 		if !found {
 			continue
 		}
 
-		bucket, found := attr[value]
+		series, found := attr.(*sync.Map).Load(value)
 		if !found {
 			continue
 		}
 
-		count += bucket.getCount(query.StartTimestamp, query.EndTimestamp)
+		count += series.(*timeSeries).getCount(query.StartTimestamp, query.EndTimestamp)
 	}
 
 	return &ResultSet{

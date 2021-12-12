@@ -1,5 +1,7 @@
 package storage
 
+import "sync"
+
 type Event struct {
 	Id         string            `json:"id"`
 	Attributes map[string]string `json:"attributes"`
@@ -26,6 +28,6 @@ type Storage interface {
 
 func Create() Storage {
 	return &inMemoryStorage{
-		attributes: make(map[string]map[string]*timeSeries),
+		attributes: &sync.Map{},
 	}
 }
