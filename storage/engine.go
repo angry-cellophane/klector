@@ -1,40 +1,31 @@
 package storage
 
-import "log"
-
 type Event struct {
 	Id         string            `json:"id"`
 	Attributes map[string]string `json:"attributes"`
+	Timestamp  uint64            `json:"timestamp"`
 }
 
 type Query struct {
-	Id         string            `json:"id"`
-	Attributes map[string]string `json:"attributes"`
+	Id             string            `json:"id"`
+	Attributes     map[string]string `json:"attributes"`
+	StartTimestamp uint64            `json:"startTimestamp"`
+	EndTimestamp   uint64            `json:"endTimestamp"`
 }
 
 type ResultSet struct {
 	Id         string            `json:"id"`
 	Attributes map[string]string `json:"attributes"`
-	Value      int64             `json:"value"`
+	Value      uint64            `json:"value"`
 }
 
 type Storage interface {
-	Write(event *Event)
+	Write(event *Event) error
 	Query(query *Query) *ResultSet
 }
 
-type inMemoryStorage struct {
-}
-
-func (s *inMemoryStorage) Write(event *Event) {
-	log.Printf("Received event %s", *event)
-	// noop
-}
-func (s *inMemoryStorage) Query(query *Query) *ResultSet {
-	// noop
-	return &ResultSet{}
-}
-
 func Create() Storage {
-	return &inMemoryStorage{}
+	return &inMemoryStorage{
+		attributes: make(map[string]map[string]*timeSeries),
+	}
 }

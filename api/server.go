@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"github.com/julienschmidt/httprouter"
 	"io.klector/klector/storage"
+	"log"
 	"net/http"
 )
 
@@ -25,9 +26,15 @@ func (s *server) store(w http.ResponseWriter, r *http.Request, ps httprouter.Par
 	if err := json.NewDecoder(r.Body).Decode(&event); err != nil {
 		w.WriteHeader(400)
 		w.Write([]byte(err.Error()))
+		return
 	}
 
-	(*s.storage).Write(&event)
+	if err := (*s.storage).Write(&event); err != nil {
+		w.WriteHeader(400)
+		w.Write([]byte(err.Error()))
+		return
+	}
+
 	w.WriteHeader(204)
 }
 
@@ -38,6 +45,7 @@ func (s *server) query(w http.ResponseWriter, r *http.Request, ps httprouter.Par
 		w.WriteHeader(400)
 		w.Write([]byte(err.Error()))
 	}
+	log.Printf("received query %v", query)
 
 	resultSet := (*s.storage).Query(&query)
 
@@ -45,13 +53,11 @@ func (s *server) query(w http.ResponseWriter, r *http.Request, ps httprouter.Par
 		w.WriteHeader(400)
 		w.Write([]byte(err.Error()))
 	}
-
-	w.WriteHeader(200)
 }
 
 func (s *server) start() error {
 	s.router.POST("/api/v1/event", s.store)
-	s.router.GET("/api/v1/query", s.query)
+	s.router.POST("/api/v1/query", s.query)
 
 	return http.ListenAndServe(":4479", s.router)
 }
