@@ -28,6 +28,11 @@ func (s *server) store(w http.ResponseWriter, r *http.Request, ps httprouter.Par
 		w.Write([]byte(err.Error()))
 		return
 	}
+	if events.Events == nil || len(events.Events) == 0 {
+		w.WriteHeader(400)
+		w.Write([]byte("no events"))
+		return
+	}
 
 	if err := (*s.storage).Write(&events); err != nil {
 		w.WriteHeader(400)
