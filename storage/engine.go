@@ -21,7 +21,7 @@ type ResultSet struct {
 
 type Storage interface {
 	Write(event *Event) error
-	Query(query *Query) *ResultSet
+	Query(query *Query) (*ResultSet, error)
 }
 
 func Create() Storage {

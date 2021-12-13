@@ -23,7 +23,7 @@ func (s *inMemoryStorage) Write(event *Event) error {
 	return nil
 }
 
-func (s *inMemoryStorage) Query(query *Query) *ResultSet {
+func (s *inMemoryStorage) Query(query *Query) (*ResultSet, error) {
 	var count uint64 = 0
 
 	series := s.tree.find(query)
@@ -35,5 +35,5 @@ func (s *inMemoryStorage) Query(query *Query) *ResultSet {
 		Id:         query.Id,
 		Attributes: query.Attributes,
 		Value:      count,
-	}
+	}, nil
 }
