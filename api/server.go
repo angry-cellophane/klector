@@ -47,7 +47,12 @@ func (s *server) query(w http.ResponseWriter, r *http.Request, ps httprouter.Par
 	}
 	log.Printf("received query %v", query)
 
-	resultSet := (*s.storage).Query(&query)
+	resultSet, err := (*s.storage).Query(&query)
+	if err != nil {
+		w.WriteHeader(500)
+		w.Write([]byte(err.Error()))
+		return
+	}
 
 	if err := json.NewEncoder(w).Encode(resultSet); err != nil {
 		w.WriteHeader(400)
