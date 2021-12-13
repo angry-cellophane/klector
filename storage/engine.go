@@ -6,6 +6,10 @@ type Event struct {
 	Timestamp  uint64            `json:"timestamp"`
 }
 
+type Events struct {
+	Events []Event `json:"events"`
+}
+
 type Query struct {
 	Id             string            `json:"id"`
 	Attributes     map[string]string `json:"attributes"`
@@ -20,7 +24,7 @@ type ResultSet struct {
 }
 
 type Storage interface {
-	Write(event *Event) error
+	Write(events *Events) error
 	Query(query *Query) (*ResultSet, error)
 }
 

@@ -22,14 +22,14 @@ func (s *server) Stop() {
 }
 
 func (s *server) store(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
-	var event storage.Event
-	if err := json.NewDecoder(r.Body).Decode(&event); err != nil {
+	var events storage.Events
+	if err := json.NewDecoder(r.Body).Decode(&events); err != nil {
 		w.WriteHeader(400)
 		w.Write([]byte(err.Error()))
 		return
 	}
 
-	if err := (*s.storage).Write(&event); err != nil {
+	if err := (*s.storage).Write(&events); err != nil {
 		w.WriteHeader(400)
 		w.Write([]byte(err.Error()))
 		return

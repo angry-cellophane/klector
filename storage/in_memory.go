@@ -9,7 +9,16 @@ type inMemoryStorage struct {
 	tree *tree
 }
 
-func (s *inMemoryStorage) Write(event *Event) error {
+func (s *inMemoryStorage) Write(events *Events) error {
+	for _, event := range events.Events {
+		if err := s.writeEvent(&event); err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
+func (s *inMemoryStorage) writeEvent(event *Event) error {
 	if len(event.Attributes) == 0 {
 		return errors.New("attributes are not defined in event")
 	}

@@ -205,10 +205,8 @@ func Test_inMemoryStorage_Write(t *testing.T) {
 			s := &inMemoryStorage{
 				tree: newTree(),
 			}
-			for _, e := range tt.args.events {
-				if err := s.Write(&e); (err != nil) != tt.wantErr {
-					t.Errorf("Write() error = %v, wantErr %v", err, tt.wantErr)
-				}
+			if err := s.Write(&Events{Events: tt.args.events}); (err != nil) != tt.wantErr {
+				t.Errorf("Write() error = %v, wantErr %v", err, tt.wantErr)
 			}
 			result, err := s.Query(tt.args.query)
 			if (err != nil) != tt.wantErr {
