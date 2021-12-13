@@ -6,7 +6,8 @@ import (
 )
 
 type inMemoryStorage struct {
-	tree *tree
+	tree            *tree
+	formatTimestamp func(timestamp uint64) uint64
 }
 
 func (s *inMemoryStorage) Write(events *Events) error {
@@ -27,6 +28,7 @@ func (s *inMemoryStorage) writeEvent(event *Event) error {
 	}
 
 	log.Printf("Received event %v", *event)
+	event.Timestamp = s.formatTimestamp(event.Timestamp)
 	s.tree.addEvent(event)
 
 	return nil

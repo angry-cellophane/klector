@@ -30,6 +30,11 @@ type Storage interface {
 
 func Create() Storage {
 	return &inMemoryStorage{
-		tree: newTree(),
+		tree:            newTree(),
+		formatTimestamp: tsToMinute,
 	}
+}
+
+func tsToMinute(ts uint64) uint64 {
+	return ts / 60
 }
