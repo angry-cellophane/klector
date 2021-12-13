@@ -6,9 +6,9 @@ import (
 )
 
 type node struct {
-	mu     sync.RWMutex
-	series *sync.Map //map[string]*timeSeries
-	nodes  *sync.Map
+	mu                 sync.RWMutex
+	tseriesByAttrValue *sync.Map //map[string]*timeSeries where string is attribute value
+	childNodes         *sync.Map //map[string]*node where string is attribute key
 }
 
 type tree struct {
@@ -30,16 +30,16 @@ func (n *node) addChildNode(event *Event, names []string) {
 	}
 
 	name := names[0]
-	child, found := n.nodes.Load(name)
+	child, found := n.childNodes.Load(name)
 	if !found {
 		n.mu.Lock()
-		child, found = n.nodes.Load(name)
+		child, found = n.childNodes.Load(name)
 		if !found {
 			child = &node{
-				series: &sync.Map{},
-				nodes:  &sync.Map{},
+				tseriesByAttrValue: &sync.Map{},
+				childNodes:         &sync.Map{},
 			}
-			n.nodes.Store(name, child)
+			n.childNodes.Store(name, child)
 		}
 		n.mu.Unlock()
 	}
@@ -50,13 +50,13 @@ func (n *node) addChildNode(event *Event, names []string) {
 }
 
 func (n *node) addToSeries(ts uint64, attrValue string, count uint64) {
-	series, found := n.series.Load(attrValue)
+	series, found := n.tseriesByAttrValue.Load(attrValue)
 	if !found {
 		n.mu.Lock()
-		series, found = n.series.Load(attrValue)
+		series, found = n.tseriesByAttrValue.Load(attrValue)
 		if !found {
 			series = newTimeSeries()
-			n.series.Store(attrValue, series)
+			n.tseriesByAttrValue.Store(attrValue, series)
 		}
 		n.mu.Unlock()
 	}
@@ -68,12 +68,12 @@ func findTimeSeries(n *node, names []string, query *Query) *timeSeries {
 		return nil
 	}
 
-	child, found := n.nodes.Load(names[0])
+	child, found := n.childNodes.Load(names[0])
 	if !found {
 		return nil
 	}
 
-	series, found := child.(*node).series.Load(query.Attributes[names[0]])
+	series, found := child.(*node).tseriesByAttrValue.Load(query.Attributes[names[0]])
 	if !found {
 		return nil
 	}
@@ -92,7 +92,7 @@ func (t *tree) find(query *Query) *timeSeries {
 func newTree() *tree {
 	return &tree{
 		root: &node{
-			nodes: &sync.Map{},
+			childNodes: &sync.Map{},
 		},
 	}
 }
