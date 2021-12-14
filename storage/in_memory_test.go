@@ -204,9 +204,6 @@ func Test_inMemoryStorage_Write(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			s := &inMemoryStorage{
 				tree: newTree(),
-				formatTimestamp: func(timestamp uint64) uint64 {
-					return timestamp
-				},
 			}
 			if err := s.Write(&Events{Events: tt.args.events}); (err != nil) != tt.wantErr {
 				t.Errorf("Write() error = %v, wantErr %v", err, tt.wantErr)
