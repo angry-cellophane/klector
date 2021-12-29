@@ -16,13 +16,20 @@ var (
 		Use:     "run",
 		Example: "klector run",
 		Short:   "Start klector",
-		RunE:    run,
+		RunE:    runServer,
 	}
 )
 
-func run(cmd *cobra.Command, args []string) error {
-	storage := storage.Create()
+func runServer(cmd *cobra.Command, args []string) error {
+	config := updateStorageConfigFromCommandLine(
+		storage.NewDefaultStorageConfiguration(),
+	)
+	storage := storage.Create(config)
 	return api.Create(&storage)
+}
+
+func updateStorageConfigFromCommandLine(config *storage.StorageConfiguration) *storage.StorageConfiguration {
+	return config
 }
 
 func Execute() int {

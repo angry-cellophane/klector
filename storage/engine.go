@@ -28,7 +28,17 @@ type Storage interface {
 	Query(query *Query) (*ResultSet, error)
 }
 
-func Create() Storage {
+type StorageConfiguration struct {
+	DataFolder string `json:"dataFolder"`
+}
+
+func NewDefaultStorageConfiguration() *StorageConfiguration {
+	return &StorageConfiguration{
+		DataFolder: "./data",
+	}
+}
+
+func Create(config *StorageConfiguration) Storage {
 	return &inMemoryStorage{
 		tree: newTree(),
 	}
