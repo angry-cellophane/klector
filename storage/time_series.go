@@ -15,18 +15,11 @@ type timeSeriesAggregator struct {
 	name     string
 	mu       sync.RWMutex
 	first    *bucketNode
-	nodes    *sync.Map //map[uint64]*bucketNode
-	formatTs func(uint64) uint64
+	nodes    *sync.Map           //map[uint64]*bucketNode
+	formatTs func(uint64) uint64 // format ts to bucket ts, assumes bucket ts <= input ts
 	timeStep uint64
 	subRange *timeSeriesAggregator
 }
-
-var (
-	milliSecondsInMinute uint64 = 60000
-	milliSecondsInHour   uint64 = 3600000
-	milliSecondsInDay    uint64 = 86400000
-	milliSecondsInMonth  uint64 = 2592000000
-)
 
 func newRootBucketNode() *bucketNode {
 	return &bucketNode{

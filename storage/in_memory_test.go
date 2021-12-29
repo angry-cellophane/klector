@@ -198,6 +198,39 @@ func Test_inMemoryStorage_Write(t *testing.T) {
 				Value:      1,
 			},
 		}, false},
+		{"Value over several months with excluded minutes", args{
+			[]Event{
+				{
+					Attributes: map[string]string{"a": "a1"},
+					Timestamp:  1*milliSecondsInMonth + 1*milliSecondsInMinute,
+				},
+				{
+					Attributes: map[string]string{"a": "a1"},
+					Timestamp:  1*milliSecondsInMonth + 15*milliSecondsInMinute,
+				},
+				{
+					Attributes: map[string]string{"a": "a1"},
+					Timestamp:  2*milliSecondsInMonth + 45*milliSecondsInMinute,
+				},
+				{
+					Attributes: map[string]string{"a": "a1"},
+					Timestamp:  3*milliSecondsInMonth + 30*milliSecondsInMinute,
+				},
+				{
+					Attributes: map[string]string{"a": "a1"},
+					Timestamp:  5*milliSecondsInMonth + 4*milliSecondsInMinute,
+				},
+			},
+			&Query{
+				Attributes:     map[string]string{"a": "a1"},
+				StartTimestamp: 1*milliSecondsInMonth + 15*milliSecondsInMinute,
+				EndTimestamp:   5*milliSecondsInMonth + 3*milliSecondsInMinute,
+			},
+			&ResultSet{
+				Attributes: map[string]string{"a": "a1"},
+				Value:      3,
+			},
+		}, false},
 	}
 
 	for _, tt := range tests {
