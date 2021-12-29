@@ -60,10 +60,10 @@ func (n *node) addToSeries(ts uint64, attrValue string, count uint64) {
 		}
 		n.mu.Unlock()
 	}
-	series.(*timeSeries).add(ts, count)
+	series.(*timeSeriesAggregator).add(ts, count)
 }
 
-func findTimeSeries(n *node, names []string, query *Query) *timeSeries {
+func findTimeSeries(n *node, names []string, query *Query) *timeSeriesAggregator {
 	if len(names) == 0 {
 		return nil
 	}
@@ -78,13 +78,13 @@ func findTimeSeries(n *node, names []string, query *Query) *timeSeries {
 		return nil
 	}
 	if len(names) == 1 {
-		return series.(*timeSeries)
+		return series.(*timeSeriesAggregator)
 	}
 
 	return findTimeSeries(child.(*node), names[1:], query)
 }
 
-func (t *tree) find(query *Query) *timeSeries {
+func (t *tree) find(query *Query) *timeSeriesAggregator {
 	names := sortAttributes(query.Attributes)
 	return findTimeSeries(t.root, names, query)
 }

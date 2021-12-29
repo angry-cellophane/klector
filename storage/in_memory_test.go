@@ -19,12 +19,12 @@ func Test_inMemoryStorage_Write(t *testing.T) {
 		{"One attribute written and retrieved", args{
 			[]Event{{
 				Attributes: map[string]string{"a": "a"},
-				Timestamp:  1,
+				Timestamp:  1_000,
 			}},
 			&Query{
 				Attributes:     map[string]string{"a": "a"},
-				StartTimestamp: 1,
-				EndTimestamp:   1,
+				StartTimestamp: 1_000,
+				EndTimestamp:   1_000,
 			},
 			&ResultSet{
 				Attributes: map[string]string{"a": "a"},
@@ -34,12 +34,12 @@ func Test_inMemoryStorage_Write(t *testing.T) {
 		{"Composite attributes written and retrieved", args{
 			[]Event{{
 				Attributes: map[string]string{"a": "a", "b": "b"},
-				Timestamp:  1,
+				Timestamp:  1_000,
 			}},
 			&Query{
 				Attributes:     map[string]string{"a": "a", "b": "b"},
-				StartTimestamp: 1,
-				EndTimestamp:   1,
+				StartTimestamp: 1_000,
+				EndTimestamp:   1_000,
 			},
 			&ResultSet{
 				Attributes: map[string]string{"a": "a", "b": "b"},
@@ -53,8 +53,8 @@ func Test_inMemoryStorage_Write(t *testing.T) {
 			}},
 			&Query{
 				Attributes:     map[string]string{"b": "b"},
-				StartTimestamp: 1,
-				EndTimestamp:   1,
+				StartTimestamp: 1_000,
+				EndTimestamp:   1_000,
 			},
 			&ResultSet{
 				Attributes: map[string]string{"b": "b"},
@@ -68,8 +68,8 @@ func Test_inMemoryStorage_Write(t *testing.T) {
 			}},
 			&Query{
 				Attributes:     map[string]string{"a": "a"},
-				StartTimestamp: 2,
-				EndTimestamp:   4,
+				StartTimestamp: 60_000,
+				EndTimestamp:   123_000,
 			},
 			&ResultSet{
 				Attributes: map[string]string{"a": "a"},
@@ -80,17 +80,17 @@ func Test_inMemoryStorage_Write(t *testing.T) {
 			[]Event{
 				{
 					Attributes: map[string]string{"a": "a"},
-					Timestamp:  1,
+					Timestamp:  1_000,
 				},
 				{
 					Attributes: map[string]string{"a": "a"},
-					Timestamp:  1,
+					Timestamp:  1_000,
 				},
 			},
 			&Query{
 				Attributes:     map[string]string{"a": "a"},
-				StartTimestamp: 1,
-				EndTimestamp:   1,
+				StartTimestamp: 1_000,
+				EndTimestamp:   1_000,
 			},
 			&ResultSet{
 				Attributes: map[string]string{"a": "a"},
@@ -101,21 +101,21 @@ func Test_inMemoryStorage_Write(t *testing.T) {
 			[]Event{
 				{
 					Attributes: map[string]string{"a": "a"},
-					Timestamp:  3,
+					Timestamp:  150_000,
 				},
 				{
 					Attributes: map[string]string{"a": "a"},
-					Timestamp:  1,
+					Timestamp:  1_000,
 				},
 				{
 					Attributes: map[string]string{"a": "a"},
-					Timestamp:  2,
+					Timestamp:  110_000,
 				},
 			},
 			&Query{
 				Attributes:     map[string]string{"a": "a"},
-				StartTimestamp: 1,
-				EndTimestamp:   3,
+				StartTimestamp: 1_000,
+				EndTimestamp:   150_000,
 			},
 			&ResultSet{
 				Attributes: map[string]string{"a": "a"},
@@ -126,13 +126,13 @@ func Test_inMemoryStorage_Write(t *testing.T) {
 			[]Event{
 				{
 					Attributes: map[string]string{"a": "a", "b": "b"},
-					Timestamp:  1,
+					Timestamp:  1_000,
 				},
 			},
 			&Query{
 				Attributes:     map[string]string{"b": "b"},
-				StartTimestamp: 1,
-				EndTimestamp:   3,
+				StartTimestamp: 1_000,
+				EndTimestamp:   150_000,
 			},
 			&ResultSet{
 				Attributes: map[string]string{"b": "b"},
@@ -143,17 +143,17 @@ func Test_inMemoryStorage_Write(t *testing.T) {
 			[]Event{
 				{
 					Attributes: map[string]string{"a": "a", "b": "b"},
-					Timestamp:  1,
+					Timestamp:  1_000, // first minute
 				},
 				{
 					Attributes: map[string]string{"a": "a", "b": "b"},
-					Timestamp:  3,
+					Timestamp:  150_000, // third minute
 				},
 			},
 			&Query{
 				Attributes:     map[string]string{"b": "b"},
-				StartTimestamp: 1,
-				EndTimestamp:   2,
+				StartTimestamp: 1_000,   // first minute
+				EndTimestamp:   110_000, // second minute
 			},
 			&ResultSet{
 				Attributes: map[string]string{"b": "b"},
@@ -164,13 +164,13 @@ func Test_inMemoryStorage_Write(t *testing.T) {
 			[]Event{
 				{
 					Attributes: map[string]string{"a": "a", "b": "b", "c": "c", "d": "d"},
-					Timestamp:  1,
+					Timestamp:  1_000,
 				},
 			},
 			&Query{
 				Attributes:     map[string]string{"b": "b", "d": "d"},
-				StartTimestamp: 1,
-				EndTimestamp:   2,
+				StartTimestamp: 1_000,
+				EndTimestamp:   110_000,
 			},
 			&ResultSet{
 				Attributes: map[string]string{"b": "b", "d": "d"},
@@ -181,17 +181,17 @@ func Test_inMemoryStorage_Write(t *testing.T) {
 			[]Event{
 				{
 					Attributes: map[string]string{"a": "a1"},
-					Timestamp:  1,
+					Timestamp:  1_000,
 				},
 				{
 					Attributes: map[string]string{"a": "a2"},
-					Timestamp:  1,
+					Timestamp:  1_000,
 				},
 			},
 			&Query{
 				Attributes:     map[string]string{"a": "a1"},
-				StartTimestamp: 1,
-				EndTimestamp:   2,
+				StartTimestamp: 1_000,
+				EndTimestamp:   110_000,
 			},
 			&ResultSet{
 				Attributes: map[string]string{"a": "a1"},
